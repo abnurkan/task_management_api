@@ -3,4 +3,4 @@
 
 # Optional: lock files (consider including in most cases)
 /package-lock.json
-/yarn.lock
+/package.json
