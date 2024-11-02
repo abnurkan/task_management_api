@@ -3,18 +3,11 @@ const User = require('../models/User');
 const mongoose = require('mongoose');
 const router = express.Router();
 const connectDB = require('../config/db');
+const bcrypt = require('bcryptjs');
 
-
+//connect to database
 
 connectDB();
-router.get('/users/login', (req,res,next)=>{
-
-    res.status(200).json({
-        message:'greeting from login',
-       
-    });
-});
-
 router.post('/users/register', (req,res,next)=>{
     //getting user request
     const {email,username,password} = req.body;
@@ -57,15 +50,49 @@ router.post('/users/register', (req,res,next)=>{
         .catch(error =>{
             // Log the error for debugging
             console.error(error);
+
             res.status(500).json({
-                message: `registration failed ${error}`,
+                message: `registration failed ${error.message}`,
                 error: `${error}`
             });
         })
-
-
     });
 
+// user login endpoint
+
+router.post('/users/login', (req,res,next)=>{
+
+    const {email, password} = req.body;
+    User.findOne({ email })
+        .then(user =>{
+            if(!user){
+                return res.status(404).json({
+                    message: 'User not found. Please register!',
+                })
+            } else{
+                    //check if password matched
+                return bcrypt.compare(password,user.password)
+                .then(ismatch=>{
+                    if(ismatch){
+                        return res.status(200).json({
+                        message: 'login successfully',
+                    })
+                    }
+                    return res.status(400).json({
+                        message: 'invalid credentials',
+                    })
+                    
+                })
+            }               
+        })
+        .catch(error =>{
+            console.error('Error during login:', error);
+            res.status(500).json({
+                message: 'Login failed due to server error',
+                error: error.message,               
+            })        
+        })
+});
 
 
 module.exports = router;
