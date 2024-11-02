@@ -1,20 +1,35 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema({
-    email: { type: String, unique: true, required: true },
-    username: { type: String, unique: true },
-    password: { type: String, required: true },
-}, { timestamps: true });
+// Clear the cached model 
+delete mongoose.models['User'];
 
-userSchema.pre('save', function (next) {
-    if (!this.isModified('password')) return next();
-    bcrypt.hash(this.password, 10)
-        .then(hash => {
-            this.password = hash;
-            next();
-        })
-        .catch(next);
+// Define the schema
+const UserSchema = mongoose.Schema({
+    _id:mongoose.Schema.Types.ObjectId,
+    email: {type: String, required:true, unique:true},
+    username: {type: String, required: false, unique: false },
+    password: {type: String, required: true, unique: false}
 });
 
-module.exports = mongoose.model('User', userSchema);
+// Pre-save hook to hash the password
+UserSchema.pre('save', function (next) {
+    const user = this;
+    
+    // Only hash the password if it has been modified (or is new)
+    if (!user.isModified('password')) return next();
+
+    // Generate a salt and hash the password
+    bcrypt.genSalt(10, (err, salt) => {
+        if (err) return next(err);
+        bcrypt.hash(user.password, salt, (err, hash) => {
+            if (err) return next(err);
+            user.password = hash; // Save the hashed password
+            next();
+        });
+    });
+});
+
+// Create the model
+const User = mongoose.model('User', UserSchema);
+module.exports = User;
