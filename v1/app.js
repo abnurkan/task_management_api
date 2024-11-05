@@ -3,6 +3,7 @@ const express = require('express');
 const morgan = require('morgan')
 const app = express();
 const authRoutes =require('./routes/authRoutes');
+const taskRoutes =require('./routes/taskRoutes');
 
 
 
@@ -18,6 +19,9 @@ app.use(express.json());
 
 
 app.use('/api/v1',authRoutes);
+app.use('/api/v1',taskRoutes);
+
+
 
 // app.use('/', (req, res,next) => {
 //     res.send('Hello, welcome to Task amnagement API');
