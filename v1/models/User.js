@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-// Clear the cached model 
-delete mongoose.models['User'];
+// // Clear the cached model 
+// delete mongoose.models['User'];
 
 // Define the schema
 const UserSchema = mongoose.Schema({

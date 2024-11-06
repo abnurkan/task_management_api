@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const router = express.Router();
 const connectDB = require('../config/db');
 const bcrypt = require('bcryptjs');
+const jwt =require('jsonwebtoken');
+const authMiddleware = require('../middleware/auth.middleware');
 
 //connect to database
 
@@ -116,9 +118,19 @@ router.post('/users/login', async (req, res, next) => {
         const isMatch = await bcrypt.compare(password, user.password);
         console.log("Password match:", isMatch); // Check if passwords match
 
+        const payload ={
+            id: user._id
+        };
+
         if (isMatch) {
+            const token = jwt.sign(payload, 
+                process.env.JWT_SECRET, 
+                { expiresIn: '3h' }
+            );
+
             return res.status(200).json({
                 message: 'Login successfully',
+                token:token,
             });
         }
 
