@@ -1,6 +1,3 @@
 # Node modules
 /node_modules
 
-# Optional: lock files (consider including in most cases)
-/package-lock.json
-/package.json

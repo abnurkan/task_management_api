@@ -1,35 +1,17 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
-const bcrypt = require('bcryptjs');
 const app = require('../app');
 const User = require('../models/User');
-
-let mongoServer;
+const { connect, close } = require('./connectDb');
 
 // Initialize and connect to the in-memory MongoDB server before tests
 
 beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-
-    // Use this URI for tests to avoid using the main app's connection
-    await mongoose.disconnect();
-    
-    //connect to in-memory MongoDB server
-    await mongoose.connect(uri);
+    await connect(); 
 });
 
-// // Clear the data in between tests to ensure isolation
-// afterEach(async () => {
-//     await User.deleteMany();
-// });
-
-// Disconnect and stop the in-memory server after all tests
 afterAll(async () => {
-    await mongoose.connection.dropDatabase();
-    await mongoose.connection.close();
-    await mongoServer.stop();
+    await close(); 
 });
 
 const registerAPI = '/api/v1/users/register';
@@ -79,14 +61,7 @@ const loginAPI = '/api/v1/users/login';
 
 describe('User Login', () => {
     it('should login an existing user', async () => {
-        // await request(app)
-        //     .post(registerAPI)
-        //     .send({
-        //         email: 'test@example.com',
-        //         username: 'testuser',
-        //         password: 'password123',
-        //     });
-
+        
         const response = await request(app)
             .post(loginAPI)
             .send({

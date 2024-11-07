@@ -4,57 +4,12 @@ const mongoose = require('mongoose');
 const router = express.Router();
 const connectDB = require('../config/db');
 const bcrypt = require('bcryptjs');
+const jwt =require('jsonwebtoken');
+const authMiddleware = require('../middleware/auth.middleware');
 
 //connect to database
 
 connectDB();
-
-// router.post('/users/register', (req,res,next)=>{
-//     //getting user request
-//     const {email,username,password} = req.body;
-
-//     // creating model object
-//     const newUser = new User({
-//         _id: new mongoose.Types.ObjectId(),
-//         email: email,
-//         username: username,
-//         password: password
-
-//     });
-
-//     //checking if email already registerd
-//     User.findOne({ email })
-//         .then(existingEmail =>{
-//             if (existingEmail) {
-//                 return res.status(400).json({
-//                     message: 'Email already in use.',
-//                 });
-//             }
-            
-//             //saving data to database
-//             return newUser.save();
-//         }) 
-//         .then(result =>{
-//             return res.status(201).json({
-//                 message: 'user registered successfully',
-//                 user: {
-//                     email:result.email,
-//                     username:result.username,
-//                 },
-//             });
-//         })
-//         .catch(error =>{
-//             // Log the error for debugging
-//             console.error(error);
-
-//             return res.status(500).json({
-//                 message: `registration failed ${error.message}`,
-//                 error: `${error}`
-//             });
-//         })
-//     });
-
-
 
 router.post('/users/register', async (req, res) => {
     const { email, username, password } = req.body;
@@ -116,9 +71,19 @@ router.post('/users/login', async (req, res, next) => {
         const isMatch = await bcrypt.compare(password, user.password);
         console.log("Password match:", isMatch); // Check if passwords match
 
+        const payload ={
+            id: user._id
+        };
+
         if (isMatch) {
+            const token = jwt.sign(payload, 
+                process.env.JWT_SECRET, 
+                { expiresIn: '3h' }
+            );
+
             return res.status(200).json({
                 message: 'Login successfully',
+                token:token,
             });
         }
 
