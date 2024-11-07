@@ -12,7 +12,7 @@ const TaskSchema = mongoose.Schema({
     dueDate: {type: Date,required:true},
     status: {type: String,enum: ['pending', 'in-progress', 'completed'],  default: 'pending'},
     priority:{type: String,enum:['low', 'medium','high'],required:true,default:'low'},
-    createdBy:{type:mongoose.Types.ObjectId, ref: 'User',required:true},
+    // createdBy:{type:mongoose.Types.ObjectId, ref: 'User',required:true},
     assignedTo: { type: String, match: /.+\@.+\..+/, required: false },
     tags: { type: [String], default: ['simple'] },
 },

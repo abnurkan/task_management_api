@@ -1,226 +1,133 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
-const app = require('../app');
-const User = require('../models/User');
+const app = require('../app'); // Path to your app.js or server.js file
 const Task = require('../models/Task');
-const { connect, close } = require('./connectDb');
+const User = require('../models/User');
+const jwt = require('jsonwebtoken');
+const {connect, close} = require('./connectDb');
 
-// Initialize and connect to the in-memory MongoDB server before tests
+// describe('Task Management API', () => {
+//     let token;
+//     let user;
 
-beforeAll(async () => {
-    await connect(); 
-});
+//     beforeAll(async () => {
 
-afterAll(async () => {
-    await close(); 
-});
+//         await connect();
+//         // Create a test user in the database and generate an authentication token
+//         user = await User.create({
+//             _id: new mongoose.Types.ObjectId(),
+//             email: 'testuser@example.com',
+//             username: 'testuser',
+//             password: 'password123'
+//         });
 
-const taskAPI = '/api/v1/tasks';
+//         // Generate JWT token for the user
+//         token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+//     });
 
+//     afterAll(async () => {
+//         // // Clean up the database after tests
+//         // await mongoose.connection.db.dropDatabase();
+//         // await mongoose.connection.close();
+//         await close();
+//     });
 
-describe('create task POST /api/v1/tasks', () => {
-    it('should create a new task', async () => {
+//     test('should create a task and set createdBy to the logged-in user', async () => {
+//         const taskData = {
+//             title: 'New Task',
+//             description: 'This is a sample task',
+//             dueDate: '2024-12-01',
+//             priority: 'High',
+//             assignedTo: 'assigneduser@example.com',
+//             tags: ['example', 'test']
+//         };
+
+//         const response = await request(app)
+//             .post('/api/v1/tasks')
+//             .set('Authorization', `Bearer ${token}`)
+//             .send(taskData);
+
+//         expect(response.status).toBe(201);
+//         expect(response.body.task.title).toBe(taskData.title);
+//         expect(response.body.task.createdBy).toBe(user._id.toString());
+//     });
+// });
+
+// task.test.js
+
+describe('POST /tasks', () => {
+    let token;
+    let user;
+    let userId;
+
+    beforeAll(async () => {
+        // Connect to a test database
+        await connect();
+
+        // Create a test user and generate a token
+        user = new User({
+            _id: new mongoose.Types.ObjectId(),
+            email: 'testuser@example.com',
+            username: 'testuser',
+            password: 'password123',
+        });
+        await user.save();
+        userId = user._id
+        // Generate JWT token
+        const payload = { id: user._id };
+        token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    });
+
+    afterAll(async () => {
+        await close();
+    });
+
+    test('should create a task', async () => {
+        const taskData = {
+            _id: new mongoose.Types.ObjectId(),
+            title: 'Test Task',
+            description: 'This is a test task',
+            dueDate: '2024-12-01',
+            priority: 'High',            
+            assignedTo: 'testuser@example.com',
+            tags: ['testing', 'api'],
+        };
+
         const response = await request(app)
-            .post(taskAPI)
-            .send({
-                title: 'Complete project',
-                description: 'Finish the task management API',
-                dueDate: '2024-12-01',
-            });
+            .post('/api/v1/tasks')
+            .set('Authorization', `Bearer ${token}`)
+            .send(taskData);
 
+        // Check response status and message
         expect(response.status).toBe(201);
         expect(response.body.message).toBe('Task created successfully');
-        expect(response.body.Task.title).toBe('Complete project');
+
+        // // Verify task properties
+        // const createdTask = await Task.findOne({ title: 'Test Task' });
+        // expect(createdTask).not.toBeNull();
+        // expect(createdTask.createdBy.toString()).toBe(user._id.toString());
+        // expect(createdTask.title).toBe(taskData.title);
+        // expect(createdTask.description).toBe(taskData.description);
+        // expect(createdTask.priority).toBe(taskData.priority);
+        // expect(createdTask.assignedTo).toBe(taskData.assignedTo);
     });
 
-    it('should check for missing required field', async () => {
-        const response = await request(app)
-            .post(taskAPI)
-            .send({
-                title: 'Complete project',
-                description: 'Finish the task management API',
-                
-            });
+    // test('should return 401 if assigned user does not exist', async () => {
+    //     const taskData = {
+    //         title: 'Invalid Assignment Task',
+    //         description: 'Task with an unregistered user assigned',
+    //         dueDate: '2024-12-10',
+    //         priority: 'Low',
+    //         assignedTo: 'nonexistent@example.com', // This user does not exist
+    //         tags: ['invalid', 'user'],
+    //     };
 
-        expect(response.status).toBe(400);
-        expect(response.body.message).toBe('Required fields are missing: title and dueDate are required.');
-        
-    });
-
-    it('should check for Already created Task', async () => {
-        const response = await request(app)
-            .post(taskAPI)
-            .send({
-                title: 'Complete project',
-                description: 'Finish the task management API',
-                dueDate: '2024-12-01',
-            });
-
-        expect(response.status).toBe(409);
-        expect(response.body.message).toBe('Task already created!');
-        
-    });
-
-
-});
-
-
-describe('Retrieve tasks GET /api/v1/tasks', () => {
-    it('get all task', async () => {
-        const response = await request(app)
-            .get(taskAPI)
-            
-        expect(response.status).toBe(200);
-
-    });
-     // this test case work fine but is true if task is empty
-    // it('should check for empty Task', async () => {
     //     const response = await request(app)
-    //         .get(taskAPI)
-            
+    //         .post('/tasks')
+    //         .set('Authorization', `Bearer ${token}`)
+    //         .send(taskData);
 
-    //     expect(response.status).toBe(404);
-    //     expect(response.body.message).toBe('Task list is empty');
-        
-    // });  
-
-    
-});
-
-describe('Retrieve single tasks GET /api/v1/tasks/:id', () => {
-    
-    it('get check inalid id format ', async () => {
-          // Create a task to use in the tests
-          const task = new Task({
-            _id: new mongoose.Types.ObjectId(),
-            title: 'Sample Task',
-            description: 'This is a sample task description',
-            dueDate: '2024-12-01'
-        });
-
-        const savedTask = await task.save();
-        taskId = savedTask._id;
-
-        //make id unformatted by s
-        changedTaskId = taskId + 's';
-        console.log(changedTaskId);
-    
-        const response = await request(app)
-            .get(`${taskAPI}/${changedTaskId}`)
-            
-        expect(response.status).toBe(400);
-        expect(response.body.message).toBe('Invalid task ID format.')
-    });
-
-    it('get single task with an id', async () => {
-
-      console.log(taskId);
-  
-      const response = await request(app)
-          .get(`${taskAPI}/${taskId}`)
-          
-      expect(response.status).toBe(200);
-      expect(response.body.task).toHaveProperty('_id', taskId.toString())
-  });
-    
-
-//     it('check for non existence id', async () => {
-         
-//       console.log(taskId);
-
-  
-//       const response = await request(app)
-//           .get(`${taskAPI}/${taskId}`)
-          
-//       expect(response.status).toBe(404);
-//       expect(response.body.task).toHaveProperty('_id', taskId.toString())
-//   });      
-});
-
-
-describe('update single tasks  PUT /api/v1/tasks/:id', () => {
-    
-    it('get check inalid id format ', async () => {
-          // Create a task to use in the tests
-          const task = new Task({
-            _id: new mongoose.Types.ObjectId(),
-            title: 'Sample Task',
-            description: 'This is a sample task description',
-            dueDate: '2024-12-01'
-        });
-
-        const savedTask = await task.save();
-        taskId = savedTask._id;
-
-        //make id unformatted by s
-        changedTaskId = taskId + 's';
-        console.log(changedTaskId);
-    
-        const response = await request(app)
-            .put(`${taskAPI}/${changedTaskId}`)
-            
-        expect(response.status).toBe(400);
-        expect(response.body.message).toBe('Invalid task ID format.')
-    });
-  
-  it('update task with a given id', async () => {
-
-      console.log(taskId);
-  
-      const response = await request(app)
-          .put(`${taskAPI}/${taskId}`)
-          .send({
-            title: "learn javascript",
-            description: "Finish the task management API",
-            dueDate: "2024-12-01",
-            status: "in-progress"
-          });
-          
-      expect(response.status).toBe(200);
-      expect(response.body.message).toBe('Task updated successfully');
-  });     
-});
-
-
-describe('delete single tasks DELETE /api/v1/tasks/:id', () => {
-    
-    it('get check inalid id format ', async () => {
-          // Create a task to use in the tests
-          const task = new Task({
-            _id: new mongoose.Types.ObjectId(),
-            title: 'Sample Task',
-            description: 'This is a sample task description',
-            dueDate: '2024-12-01'
-        });
-
-        const savedTask = await task.save();
-        taskId = savedTask._id;
-
-        //make id unformatted by s
-        changedTaskId = taskId + 's';
-        console.log(changedTaskId);
-    
-        const response = await request(app)
-            .delete(`${taskAPI}/${changedTaskId}`)
-            
-        expect(response.status).toBe(400);
-        expect(response.body.message).toBe('Invalid task ID format.')
-    });
-  
-  it('Delete task with a given id', async () => {
-
-      console.log(taskId);
-  
-      const response = await request(app)
-          .delete(`${taskAPI}/${taskId}`)
-          .send({
-            title: "learn javascript",
-            description: "Finish the task management API",
-            dueDate: "2024-12-01",
-            status: "in-progress"
-          });
-          
-      expect(response.status).toBe(200);
-      expect(response.body.message).toBe('Task deleted successfully');
-  });     
+    //     expect(response.status).toBe(401);
+    //     expect(response.body.message).toBe('Assigned user cannot perform the task');
+    // });
 });

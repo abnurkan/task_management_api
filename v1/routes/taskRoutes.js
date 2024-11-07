@@ -40,10 +40,20 @@ router.post('/tasks', authMiddleware, validateTask, async (req, res) => {
             description,
             dueDate,
             priority,
-            createdBy: currentUser,
             assignedTo:"abba@gmail.com",
             tags,
         });
+
+        // const newTask = new Task({
+        //     _id: new mongoose.Types.ObjectId(),
+        //     title,
+        //     description,
+        //     dueDate,
+        //     priority,
+        //     createdBy: currentUser,
+        //     assignedTo:"abba@gmail.com",
+        //     tags,
+        // });
 
         const createdTask = await newTask.save();
         return res.status(201).json({
@@ -53,8 +63,7 @@ router.post('/tasks', authMiddleware, validateTask, async (req, res) => {
                 description: createdTask.description,
                 dueDate:createdTask.dueDate,
                 status: createdTask.status,
-                priority: createdTask.priority,
-                createdBy: createdTask.createdBy,
+                priority: createdTask.priority,                
                 assignedTo: createdTask.assignedTo,
                 tags: createdTask.tags,
                 createdAt: createdTask.createdAt,
