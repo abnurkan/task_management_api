@@ -24,7 +24,10 @@ git clone https://github.com/abnurkan/task_management_api.git
 Change directory to the project folder:
 
 ```bash
-cd C:\Users\ABDULAZIZ NURA KANI\Desktop\JS\task_management_api\v1
+cd task_management_api\v1
+```
+```bash
+cd v1
 ```
 
 ### Step 3: Install Dependencies
