@@ -11,53 +11,6 @@ const authMiddleware = require('../middleware/auth.middleware');
 
 connectDB();
 
-// router.post('/users/register', (req,res,next)=>{
-//     //getting user request
-//     const {email,username,password} = req.body;
-
-//     // creating model object
-//     const newUser = new User({
-//         _id: new mongoose.Types.ObjectId(),
-//         email: email,
-//         username: username,
-//         password: password
-
-//     });
-
-//     //checking if email already registerd
-//     User.findOne({ email })
-//         .then(existingEmail =>{
-//             if (existingEmail) {
-//                 return res.status(400).json({
-//                     message: 'Email already in use.',
-//                 });
-//             }
-            
-//             //saving data to database
-//             return newUser.save();
-//         }) 
-//         .then(result =>{
-//             return res.status(201).json({
-//                 message: 'user registered successfully',
-//                 user: {
-//                     email:result.email,
-//                     username:result.username,
-//                 },
-//             });
-//         })
-//         .catch(error =>{
-//             // Log the error for debugging
-//             console.error(error);
-
-//             return res.status(500).json({
-//                 message: `registration failed ${error.message}`,
-//                 error: `${error}`
-//             });
-//         })
-//     });
-
-
-
 router.post('/users/register', async (req, res) => {
     const { email, username, password } = req.body;
 

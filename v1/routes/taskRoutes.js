@@ -34,26 +34,18 @@ router.post('/tasks', authMiddleware, validateTask, async (req, res) => {
         console.log(currentUser);
 
         // Create a new task
+       
+
         const newTask = new Task({
             _id: new mongoose.Types.ObjectId(),
             title,
             description,
             dueDate,
             priority,
-            assignedTo:"abba@gmail.com",
+            createdBy: currentUser,
+            assignedTo,
             tags,
         });
-
-        // const newTask = new Task({
-        //     _id: new mongoose.Types.ObjectId(),
-        //     title,
-        //     description,
-        //     dueDate,
-        //     priority,
-        //     createdBy: currentUser,
-        //     assignedTo:"abba@gmail.com",
-        //     tags,
-        // });
 
         const createdTask = await newTask.save();
         return res.status(201).json({
