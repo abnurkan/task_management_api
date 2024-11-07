@@ -6,7 +6,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('../middleware/auth.middleware');
 // const {validateTask, ValidateStatus} = require('../middleware/taskValidator');
-const validateTask = require('../middleware/taskValidator');
+const validateTask = require('../utils/taskValidator');
 
 
 router.post('/tasks', authMiddleware, validateTask, async (req, res) => {
