@@ -16,7 +16,7 @@ Ensure you have the following installed:
 Clone this repository to your local machine using the following command:
 
 ```bash
-git clone <https://github.com/abnurkan/task_management_api.git>
+git clone https://github.com/abnurkan/task_management_api.git
 ```
 
 ### Step 2: Navigate to the Project Directory
