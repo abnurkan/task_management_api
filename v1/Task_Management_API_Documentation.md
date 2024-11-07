@@ -1,7 +1,7 @@
 
 # Task Management API Documentation
 
-**Base URL**: `http://localhost:5000/api`
+**Base URL**: `http://localhost:5000/api/v1/`
 
 ## Table of Contents
 
@@ -26,7 +26,7 @@
 
 ### Register a New User
 
-**Endpoint**: `/api/v1/users/register`  
+**Endpoint**: `users/register`  
 **Method**: `POST`
 
 #### Request Body
@@ -65,7 +65,7 @@
 
 ### Login
 
-**Endpoint**: `/api/v1//users/login`  
+**Endpoint**: `/users/login`  
 **Method**: `POST`
 
 #### Request Body
@@ -113,7 +113,7 @@ Authorization: Bearer <token>
 
 ### Create a Task
 
-**Endpoint**: `/api/v1/tasks`  
+**Endpoint**: `/tasks`  
 **Method**: `POST`
 
 #### Request Body
@@ -186,7 +186,7 @@ Authorization: Bearer <token>
 
 ### Get All Tasks
 
-**Endpoint**: `/api/v1/tasks`  
+**Endpoint**: `/tasks`  
 **Method**: `GET`
 
 #### Query Parameters
@@ -202,7 +202,7 @@ Authorization: Bearer <token>
 #### Example Request
 
 ```
-GET /api/v1/tasks?page=1&limit=10&status=pending&priority=high&tags=work,urgent
+GET /tasks?page=1&limit=10&status=pending&priority=high&tags=work,urgent
 ```
 
 #### Responses
