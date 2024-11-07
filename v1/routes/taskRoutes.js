@@ -51,6 +51,7 @@ router.post('/tasks', authMiddleware, validateTask, async (req, res) => {
         return res.status(201).json({
             message: 'Task created successfully',
             task: {
+                id: createdTask._id,    //I include it for manual testing 
                 title: createdTask.title,
                 description: createdTask.description,
                 dueDate:createdTask.dueDate,
@@ -101,7 +102,7 @@ router.get('/tasks',authMiddleware, async (req,res) =>{
             const totalPages = Math.ceil(totalTasks / limit);
 
             res.status(200).json({
-                Task:tasks.map(task => ({
+                Task:tasks.map(task => ({                    
                     title: task.title,
                     description: task.description,
                     dueDate: task.dueDate,
