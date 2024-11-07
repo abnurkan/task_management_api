@@ -1,7 +1,7 @@
 
 # Task Management API Documentation
 
-**Base URL**: `http://localhost:5000/api/v1/`
+**Base URL**: `/api/v1/`
 
 ## Table of Contents
 
