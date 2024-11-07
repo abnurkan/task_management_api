@@ -14,7 +14,7 @@
    - [Get Task by ID](#get-task-by-id)
    - [Update a Task](#update-a-task)
    - [Delete a Task](#delete-a-task)
-   - [Share a Task](#share-a-task)
+  
 
 ---
 
@@ -26,7 +26,7 @@
 
 ### Register a New User
 
-**Endpoint**: `/users/register`  
+**Endpoint**: `/api/v1/users/register`  
 **Method**: `POST`
 
 #### Request Body
@@ -65,7 +65,7 @@
 
 ### Login
 
-**Endpoint**: `/users/login`  
+**Endpoint**: `/api/v1//users/login`  
 **Method**: `POST`
 
 #### Request Body
@@ -94,7 +94,8 @@
 
 ```json
 {
-  "token": "your.jwt.token"
+    "message": "Login successfully",
+    "token": "your.jwt.token"
 }
 ```
 
@@ -112,7 +113,7 @@ Authorization: Bearer <token>
 
 ### Create a Task
 
-**Endpoint**: `/tasks`  
+**Endpoint**: `/api/v1/tasks`  
 **Method**: `POST`
 
 #### Request Body
@@ -131,19 +132,30 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "title": "Complete project",
-  "description": "Finish the task management API",
-  "dueDate": "2024-12-01",
-  "status": "pending",
-  "priority": "high",
-  "assignedTo": "user@example.com",
-  "tags": ["work", "urgent"]
+    "message": "Task created successfully",
+    "task": {
+        "id": "672cbdcb6858d2eb4179089b",
+        "title": "learn javascript 10",
+        "description": "Finish the task management API",
+        "dueDate": "2024-12-01T00:00:00.000Z",
+        "status": "pending",
+        "priority": "high",
+        "assignedTo": "abba2@gmail.com",
+        "tags": [
+            "urgent",
+            "important"
+        ],
+        "createdAt": "2024-11-07T13:16:59.851Z",
+        "updatedAt": "2024-11-07T13:16:59.851Z"
+    }
 }
 ```
 
 #### Responses
 
 - **201 Created**: Task created successfully.
+- **401 Created**: Assigned user cannot perform the task(not registered).
+- **409 Bad Request**: Task already created!.
 - **400 Bad Request**: Missing or invalid fields.
 - **500 Internal Server Error**: Failed to create task.
 
@@ -151,15 +163,22 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "_id": "task_id",
-  "title": "Complete project",
-  "description": "Finish the task management API",
-  "dueDate": "2024-12-01",
-  "status": "pending",
-  "priority": "high",
-  "createdBy": "user_id",
-  "assignedTo": "user@example.com",
-  "tags": ["work", "urgent"]
+    "message": "Task created successfully",
+    "task": {
+        "id": "672cbdcb6858d2eb4179089b",
+        "title": "learn javascript 10",
+        "description": "Finish the task management API",
+        "dueDate": "2024-12-01T00:00:00.000Z",
+        "status": "pending",
+        "priority": "high",
+        "assignedTo": "abba2@gmail.com",
+        "tags": [
+            "urgent",
+            "important"
+        ],
+        "createdAt": "2024-11-07T13:16:59.851Z",
+        "updatedAt": "2024-11-07T13:16:59.851Z"
+    }
 }
 ```
 
@@ -167,7 +186,7 @@ Authorization: Bearer <token>
 
 ### Get All Tasks
 
-**Endpoint**: `/tasks`  
+**Endpoint**: `/api/v1/tasks`  
 **Method**: `GET`
 
 #### Query Parameters
@@ -183,27 +202,103 @@ Authorization: Bearer <token>
 #### Example Request
 
 ```
-GET /tasks?page=1&limit=10&status=pending&priority=high&tags=work,urgent
+GET /api/v1/tasks?page=1&limit=10&status=pending&priority=high&tags=work,urgent
 ```
 
 #### Responses
 
 - **200 OK**: List of tasks with pagination.
+- **404 OK**: Task list is empty.
 - **500 Internal Server Error**: Failed to retrieve tasks.
 
 #### Example Success Response
 
 ```json
-[
-  {
-    "_id": "task_id",
-    "title": "Complete project",
-    "status": "pending",
-    "priority": "high",
-    "createdBy": "user_id",
-    "tags": ["work", "urgent"]
-  }
-]
+{
+    "Task": [
+        {
+            "title": "learn javascript 10",
+            "description": "Finish the task management API",
+            "dueDate": "2024-12-01T00:00:00.000Z",
+            "status": "pending",
+            "priority": "high",
+            "createdBy": "672ca7070640603ad349d874",
+            "assignedTo": "abba2@gmail.com",
+            "tags": [
+                "urgent",
+                "important"
+            ],
+            "createdAt": "2024-11-07T13:16:59.851Z",
+            "updatedAt": "2024-11-07T13:16:59.851Z"
+        },
+        {
+            "title": "learn javascript 8",
+            "description": "Finish the task management API",
+            "dueDate": "2024-12-01T00:00:00.000Z",
+            "status": "pending",
+            "priority": "high",
+            "createdBy": "672ca7070640603ad349d874",
+            "assignedTo": "abba2@gmail.com",
+            "tags": [
+                "urgent",
+                "important"
+            ],
+            "createdAt": "2024-11-07T13:02:39.984Z",
+            "updatedAt": "2024-11-07T13:02:39.984Z"
+        },
+        {
+            "title": "learn javascript 7",
+            "description": "Finish the task management API",
+            "dueDate": "2024-12-01T00:00:00.000Z",
+            "status": "pending",
+            "priority": "high",
+            "createdBy": "672ca7070640603ad349d874",
+            "assignedTo": "abba2@gmail.com",
+            "tags": [
+                "urgent",
+                "important"
+            ],
+            "createdAt": "2024-11-07T12:57:38.380Z",
+            "updatedAt": "2024-11-07T12:57:38.380Z"
+        },
+        {
+            "title": "learn javascript 6",
+            "description": "Finish the task management API",
+            "dueDate": "2024-12-01T00:00:00.000Z",
+            "status": "pending",
+            "priority": "high",
+            "createdBy": "672ca7070640603ad349d874",
+            "assignedTo": "abba2@gmail.com",
+            "tags": [
+                "urgent",
+                "important"
+            ],
+            "createdAt": "2024-11-07T12:56:54.831Z",
+            "updatedAt": "2024-11-07T12:56:54.831Z"
+        },
+        {
+            "title": "learn javascript 4",
+            "description": "Finish the task management API",
+            "dueDate": "2024-12-01T00:00:00.000Z",
+            "status": "pending",
+            "priority": "high",
+            "createdBy": "672ca7070640603ad349d874",
+            "assignedTo": "abba2@gmail.com",
+            "tags": [
+                "urgent",
+                "important"
+            ],
+            "createdAt": "2024-11-07T12:33:32.704Z",
+            "updatedAt": "2024-11-07T12:33:32.704Z"
+        }
+    ],
+    "pagination": {
+        "currentPage": 1,
+        "totalPages": 2,
+        "totalTasks": 7,
+        "pageSize": 5
+    }
+}
 ```
 
 ---
@@ -246,19 +341,21 @@ You can update any fields of a task, such as `title`, `description`, `dueDate`, 
 
 - **200 OK**: Task updated successfully.
 - **404 Not Found**: Task not found.
+- **401 Unauthorised**: Invalid or expired token!.
 - **500 Internal Server Error**: Failed to update task.
 
 ---
 
 ### Delete a Task
 
-**Endpoint**: `/tasks/:id`  
+**Endpoint**: `/api/v1/tasks/:id`  
 **Method**: `DELETE`
 
 #### Responses
 
 - **200 OK**: Task deleted successfully.
 - **404 Not Found**: Task not found.
+- **401 Unauthorised**: Invalid or expired token!.
 - **500 Internal Server Error**: Failed to delete task.
 
 #### Example Success Response
@@ -266,42 +363,6 @@ You can update any fields of a task, such as `title`, `description`, `dueDate`, 
 ```json
 {
   "message": "Task deleted successfully"
-}
-```
-
----
-
-### Share a Task
-
-**Endpoint**: `/tasks/:id/share`  
-**Method**: `POST`
-
-#### Request Body
-
-| Field   | Type   | Required | Description               |
-|---------|--------|----------|---------------------------|
-| `email` | String | Yes      | Email of user to share with.|
-
-#### Example Request
-
-```json
-{
-  "email": "share_with_user@example.com"
-}
-```
-
-#### Responses
-
-- **200 OK**: Task shared successfully.
-- **400 Bad Request**: Task already shared with this user.
-- **404 Not Found**: Task not found.
-- **500 Internal Server Error**: Failed to share task.
-
-#### Example Success Response
-
-```json
-{
-  "message": "Task shared with share_with_user@example.com"
 }
 ```
 
@@ -327,5 +388,5 @@ All endpoints may return the following common error codes with structured error 
 ```
 
 ---
-
-This documentation provides complete information for all endpoints, including request and response formats, making it easy to implement and interact with the Task Management API.
+## request Valiadtion
+All request was validated across each endpoint.
