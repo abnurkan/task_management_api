@@ -24,7 +24,7 @@ git clone https://github.com/abnurkan/task_management_api.git
 Change directory to the project folder:
 
 ```bash
-cd task_management_api\v1
+cd task_management_api
 ```
 ```bash
 cd v1
