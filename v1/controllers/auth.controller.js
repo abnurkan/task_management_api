@@ -27,10 +27,15 @@ exports.RegisterUser =async (req, res) => {
 
         return res.status(201).json({
             message: 'user registered successfully',
-            user: { 
+            user: {
+             
                 email: newUser.email,
-                username:newUser.username,
-             },
+                username: newUser.username
+            },
+            // user: { 
+            //     email: newUser.email,
+            //     username:newUser.username,
+            //  },
         });
     } catch (error) {
         console.error(error);

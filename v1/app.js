@@ -31,7 +31,7 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 // 404 error handling for undefined routes
 app.use((req,res,next) =>{
-    const error = new Error('not found');
+    const error = new Error('Route not found or incorrectly Type');
 
     error.status = 404;
     next(error);
@@ -40,11 +40,10 @@ app.use((req,res,next) =>{
 //error handling
 
 app.use((error,req,res,next) =>{
-    res.status(error.status || 500 );
-    res.json({
-        "message": error.message
-
-    });  
+    res.status(500).json({
+        message: 'Server in the main app failed to start',
+        error: error.message,
+    });
 });
 
 

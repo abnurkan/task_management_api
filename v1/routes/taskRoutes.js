@@ -5,7 +5,7 @@ const authMiddleware = require('../middleware/auth.middleware');
 const validateTask = require('../utils/taskValidator');
 const taskControllers = require('../controllers/task.controller');
 
-router.post('/tasks', authMiddleware, validateTask, taskControllers.createTask);
+router.post('/tasks', authMiddleware,validateTask, taskControllers.createTask);
 
 
 router.get('/tasks',authMiddleware,taskControllers.getTask );

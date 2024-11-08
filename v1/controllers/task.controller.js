@@ -26,7 +26,7 @@ exports.createTask = async (req, res) => {
 
         // Get current user from authMiddleware
         const currentUser = req.user._id;
-        console.log(currentUser);
+        console.log(`current User ${currentUser}`);
 
         // Create a new task
        
@@ -46,7 +46,7 @@ exports.createTask = async (req, res) => {
         return res.status(201).json({
             message: 'Task created successfully',
             task: {
-                id: createdTask._id,    //I include it for manual testing 
+                _id: createdTask._id,    //I include it for manual testing 
                 title: createdTask.title,
                 description: createdTask.description,
                 dueDate:createdTask.dueDate,
@@ -54,6 +54,7 @@ exports.createTask = async (req, res) => {
                 priority: createdTask.priority,                
                 assignedTo: createdTask.assignedTo,
                 tags: createdTask.tags,
+                createdBy:createdTask.createdBy,
                 createdAt: createdTask.createdAt,
                 updatedAt: createdTask.updatedAt,
 
@@ -61,13 +62,11 @@ exports.createTask = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
-        if (!res.headersSent) { // Ensure headers haven't already been sent
-            return res.status(500).json({
-                message: 'Server failed to create task',
-                error: error.message,
-            });
-        }
+        console.error("Error in createTask controller:", error); // Log full error details
+        return res.status(500).json({
+            message: 'Server failed to create task',
+            error: error.message,
+        });
     }
 }
 
