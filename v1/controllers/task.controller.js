@@ -334,21 +334,34 @@ exports.shareTask = async (req, res) => {
         }
   
         // Update the sharedWith array in the task model using spread operator
-        task.sharedWith = [...new Set([...task.sharedWith, ...emails])]; // Ensure unique emails
+
+        task.sharedWith = [...new Set([...task.sharedWith, ...emails])]; 
 
         // Save the updated task
         await task.save();
 
         // Send email notifications to the users who the task was shared with
-        emails.forEach(email => {
-            sendEmail(email, task.title); // Send an email to each recipient
-        });
-  
-      res.status(200).json({ message: 'Task shared successfully', task });
+        const emailResults = [];
+        for (const email of emails) {
+            const result = await sendEmail(email, task.title); 
+            emailResults.push(result);
+        }
+
+        // Check if all emails were sent successfully
+        if (emailResults.every(result => result === true)) {
+            
+            return res.status(200).json({ message: 'Task shared successfully. Check your email.' });
+
+        } else {
+
+            return res.status(500).json({ message: 'Some emails were not sent successfully.' });
+        }
+
+
 
     } catch (error) {
         console.error(`server error occurred while sharing the task; ${error}`);
-        
+
         res.status(500).json({ message: 'An error occurred while sharing the task.' });
     }
   }

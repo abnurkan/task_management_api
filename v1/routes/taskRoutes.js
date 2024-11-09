@@ -16,4 +16,6 @@ router.put('/tasks/:id', authMiddleware,validateTask, taskControllers.updateTask
 
 router.delete('/tasks/:id', authMiddleware, taskControllers.deleteTask);
 
+router.post('/tasks/share', authMiddleware, taskControllers.shareTask);
+
 module.exports = router;

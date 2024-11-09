@@ -4,28 +4,32 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
   service: 'gmail', // or 'smtp.mailtrap.io' for testing purposes
   auth: {
-    user: process.env.EMAIL_USER, // Your email address
-    pass: process.env.EMAIL_PASS, // Your email password or app password
+    user: process.env.EMAIL_USER, // your email address
+    pass: process.env.EMAIL_PASS, // your app password
+  },
+  tls: {
+    rejectUnauthorized: false,  // Ignore certificate errors
   },
 });
 
 // Function to send an email to a single recipient
-const sendEmail = (toEmail, taskTitle) => {
+const sendEmail = async (toEmail, taskTitle) => {
+
   const mailOptions = {
     from: process.env.EMAIL_USER, // Sender address
     to: toEmail, // Recipient address
-    subject: 'A task has been shared with you', // Subject of the email
+    subject: 'A task has been shared with you from Task management API', // Subject of the email
     text: `A task titled "${taskTitle}" has been shared with you. Please check your task list for more details.`, // Email body
   };
 
-  // Send the email
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.log('Error sending email:', error);
-    } else {
-      console.log('Email sent:', info.response);
-    }
-  });
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent:', info.response);
+    return true; // Return true if the email was sent successfully
+  } catch (error) {
+    console.log('Error sending email:', error);
+    return false; // Return false if there was an error sending the email
+  }
 };
 
 module.exports = sendEmail;
