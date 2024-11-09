@@ -37,6 +37,8 @@ Install the required packages listed in `package.json`:
 ```bash
 npm install
 ```
+Install redis server on your system:
+
 
 ### Step 4: Set Up MongoDB Database
 
