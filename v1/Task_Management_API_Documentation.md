@@ -14,6 +14,7 @@
    - [Get Task by ID](#get-task-by-id)
    - [Update a Task](#update-a-task)
    - [Delete a Task](#delete-a-task)
+   - [share a Task](#share-a-task)
   
 
 ---
@@ -367,6 +368,47 @@ You can update any fields of a task, such as `title`, `description`, `dueDate`, 
 ```
 
 ---
+### Share a Task
+
+**Endpoint**: `/tasks/:id/share`  
+**Method**: `POST`
+
+#### Request Body
+
+| Field   | Type   | Required | Description               |
+|---------|--------|----------|---------------------------|
+| `taskId` | String | Yes      | Task id  to share|
+| `email` | array of String | Yes      | Email of user to share with.|
+
+#### Example Request
+
+```json
+{
+  "taskId": "672f217f4ec48304c4abd25e",
+  "emails": [
+    "abdulnurakani@gmail.com"  
+    
+    ]
+}
+```
+
+#### Responses
+
+- **200 OK**: Task shared successfully.
+- **400 Bad Request**: Task already shared with this user.
+- **404 Not Found**: Task not found.
+- **500 Internal Server Error**: Failed to share task.
+
+#### Example Success Response
+
+```json
+{
+  "message": "Task shared successfully. Check your email."
+}
+```
+
+---
+
 
 ## Error Handling
 

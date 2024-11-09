@@ -80,6 +80,7 @@ The server will be accessible at `http://localhost:3000` by default.
 - `GET /tasks/:id`: Retrieve a specific task by its ID
 - `PATCH /tasks/:id`: Update an existing task
 - `DELETE /tasks/:id`: Delete a task
+- `POST/tasks/share`: share a task
 
 For detailed information on each endpoint, including request and response formats, refer to this  [API documentation](https://github.com/abnurkan/task_management_api/blob/main/v1/Task_Management_API_Documentation.md) .
 
