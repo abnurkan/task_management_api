@@ -21,7 +21,7 @@ git clone https://github.com/abnurkan/task_management_api.git
 
 ### Step 2: Navigate to the Project Directory
 
-Change directory to the project folder:
+Change directory to the project folder v1 otherwise it will not work:
 
 ```bash
 cd task_management_api
@@ -85,12 +85,15 @@ The server will be accessible at `http://localhost:3000` by default.
 For detailed information on each endpoint, including request and response formats, refer to this  [API documentation](https://github.com/abnurkan/task_management_api/blob/main/v1/Task_Management_API_Documentation.md) .
 
 ## Testing
-All my API endpoint was tested manually using POSTMAN and it works perfectly.However I try automatic unit test only `POST /users/register` and `POST /users/login` succeed after i add protection to the endpoint.
+All my API endpoint was tested manually using POSTMAN as well as automatic unit test using JEST and it works perfectly.
 
-To view my manual testcase you can check [here](https://github.com/abnurkan/task_management_api/pull/1).
+To view my testcases you can check [here](https://github.com/abnurkan/task_management_api/pull/1).
 
 You can run automatic tests with the following command:
 
 ```bash
 npm test
 ```
+# NOTE
+
+- All optional and bonus feature was implemented and tested both automatically and manually.
