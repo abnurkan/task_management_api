@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const Task  = require('../models/Task');
 const User  = require('../models/User');
 const jwt = require('jsonwebtoken');
+const redisClient = require('../config/redis');
+const sendEmail = require('../utils/sendEmail'); // Import the sendEmail function
 
 
 exports.createTask = async (req, res) => {
@@ -76,16 +78,55 @@ exports.getTask = async (req,res) =>{
         const task = await Task.find({});
 
         if(task.length >=1){
-            console.log(task);
+            console.log(`task lengh ${task}`);
+
              // Get pagination parameters from query, with default values
             const page = parseInt(req.query.page) || 1; // Default to page 1
-            const limit = parseInt(req.query.limit) || 5; // Default to 10 tasks per page
+            const limit = parseInt(req.query.limit) || 5; // Default to 5 tasks per page if not entered
+
+            const status = parseInt(req.query.status) || 'pending'; // Default to page 1
+            const priority = parseInt(req.query.limit) || 'low'; // Default to 5 tasks per page if not entered
+
+            //define cached key here
+            const taskcachedKey = `tasks:page=${page}&limit=${limit}`;
+
+            //fetch task from cache rather than from database 
+
+            const cachedTask = await redisClient.get(taskcachedKey);
+
+            //check if data present in the cache
+            if(cachedTask){
+                return res.status(200).json({
+                    Task:cachedTask.map(task => ({                    
+                        title: task.title,
+                        description: task.description,
+                        dueDate: task.dueDate,
+                        status: task.status,
+                        priority: task.priority,
+                        createdBy: task.createdBy,
+                        assignedTo: task.assignedTo,
+                        tags: task.tags,
+                        createdAt: task.createdAt,
+                        updatedAt: task.updatedAt
+                    })),
+                    pagination: {
+                        currentPage: page,
+                        totalPages,
+                        totalTasks,
+                        pageSize: tasks.length,
+                    }
+                });
+
+            }
+
+
+
 
             // Calculate the starting index for the query
             const skip = (page - 1) * limit;
 
             // Retrieve tasks from the database with pagination
-            const tasks = await Task.find()
+            const tasks = await Task.find((status && { status }),(priority && { priority }))
                 .skip(skip) // Skip documents for pagination
                 .limit(limit) // Limit the number of documents returned
                 .sort({ createdAt: -1 }); // Sort by creation date, newest first
@@ -94,7 +135,7 @@ exports.getTask = async (req,res) =>{
             const totalTasks = await Task.countDocuments();
             const totalPages = Math.ceil(totalTasks / limit);
 
-            res.status(200).json({
+            const response = {
                 Task:tasks.map(task => ({                    
                     title: task.title,
                     description: task.description,
@@ -113,10 +154,15 @@ exports.getTask = async (req,res) =>{
                     totalTasks,
                     pageSize: tasks.length,
                 }
-            });
-            // return res.status(200).json({
-            //     task             
-            // })
+            }
+
+            //here I  Store the response in Redis with an expiration time (e.g., 1 hour = 3600s)
+            //so that next time it can be use from cache memory
+
+            await redisClient.setEx(taskcachedKey,3600,JSON.stringify(response));
+
+            return res.status(200).json(response);
+            
         }else{
             return res.status(404).json({
             message:'Task list is empty',            
@@ -263,3 +309,46 @@ exports.deleteTask = async (req,res) =>{
         })     
     }
 }
+
+
+exports.shareTask = async (req, res) => {
+
+    const { taskId, emails } = req.body; // taskId and emails are sent in the request body
+    
+    // Ensure emails is an array
+    if (!Array.isArray(emails) || emails.length === 0) {
+      return res.status(400).json({ message: 'Please provide a valid list of emails.' });
+    }
+  
+    try {
+        // Find the task to be shared
+        const task = await Task.findById(taskId);
+        if (!task) {
+        return res.status(404).json({ message: 'Task not found' });
+        }
+  
+        // Check if the current user is the task creator
+
+        if (task.createdBy.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'You can only share tasks that you have created.' });
+        }
+  
+        // Update the sharedWith array in the task model using spread operator
+        task.sharedWith = [...new Set([...task.sharedWith, ...emails])]; // Ensure unique emails
+
+        // Save the updated task
+        await task.save();
+
+        // Send email notifications to the users who the task was shared with
+        emails.forEach(email => {
+            sendEmail(email, task.title); // Send an email to each recipient
+        });
+  
+      res.status(200).json({ message: 'Task shared successfully', task });
+
+    } catch (error) {
+        console.error(`server error occurred while sharing the task; ${error}`);
+        
+        res.status(500).json({ message: 'An error occurred while sharing the task.' });
+    }
+  }
