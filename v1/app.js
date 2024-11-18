@@ -5,8 +5,33 @@ const app = express();
 const authRoutes =require('./routes/authRoutes');
 const taskRoutes =require('./routes/taskRoutes');
 
+// Swagger options
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
+require('dotenv').config();
+const PORT = process.env.PORT || 5000;
 
+const options = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Task Management API',
+            version: '1.0.0',
+            description: 'API for managing tasks',
+        },
+        servers: [
+            {
+                url: `http://localhost: ${PORT}`,
+            },
+        ],
+    },
+    apis: ['./docs/*.swagger.js'], // Include all Swagger docs
+};
+
+const swaggerSpec = swaggerJsdoc(options);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 //add morgan 
@@ -17,15 +42,17 @@ app.use(express.json());
 // Middleware to parse JSON
 app.use(express.json());
 
+// Swagger route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api/v1',authRoutes);
 app.use('/api/v1',taskRoutes);
 
 
 
-// app.use('/', (req, res,next) => {
-//     res.send('Hello, welcome to Task amnagement API');
-//   });
+app.use('/', (req, res,next) => {
+    res.send('Hello, welcome to Task amnagement API');
+  });
 
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
