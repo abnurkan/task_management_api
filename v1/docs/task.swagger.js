@@ -25,6 +25,51 @@
  *         $ref: '#/components/responses/Unauthorized'
  */
 
+// /**
+//  * @swagger
+//  * /tasks:
+//  *   get:
+//  *     summary: Get all tasks
+//  *     security:
+//  *       - BearerAuth: []
+//  *     tags: [Tasks]
+//  *     parameters:
+//  *       - name: page
+//  *         in: query
+//  *         schema:
+//  *           type: integer
+//  *           example: 1
+//  *         description: Page number for pagination
+//  *       - name: limit
+//  *         in: query
+//  *         schema:
+//  *           type: integer
+//  *           example: 5
+//  *         description: Number of tasks per page
+//  *       - name: status
+//  *         in: query
+//  *         schema:
+//  *           type: string
+//  *           example: pending
+//  *         description: Filtering tasks based on status
+//  *       - name: priority
+//  *         in: query
+//  *         schema:
+//  *           type: string
+//  *           example: low
+//  *         description: Filtering tasks based on priority
+//  *     responses:
+//  *       200:
+//  *         description: A list of tasks
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: array
+//  *               items:
+//  *                 $ref: '#/components/schemas/Task'
+//  *       401:
+//  *         $ref: '#/components/responses/Unauthorized'
+//  */
 /**
  * @swagger
  * /tasks:
@@ -44,19 +89,55 @@
  *         in: query
  *         schema:
  *           type: integer
- *           example: 10
+ *           example: 5
  *         description: Number of tasks per page
+ *       - name: status
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: [pending, in-progress, completed]
+ *           example: pending
+ *         description: Filter tasks by status
+ *       - name: priority
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: [low, medium, high]
+ *           example: high
+ *         description: Filter tasks by priority
  *     responses:
  *       200:
- *         description: A list of tasks
+ *         description: A list of tasks with pagination
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Task'
+ *               type: object
+ *               properties:
+ *                 Task:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Task'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                       example: 1
+ *                     totalPages:
+ *                       type: integer
+ *                       example: 10
+ *                     totalTasks:
+ *                       type: integer
+ *                       example: 100
+ *                     pageSize:
+ *                       type: integer
+ *                       example: 10
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/TaskNotFound'
+ *       422:
+ *         $ref: '#/components/responses/ValidationError'
  */
 
 /**

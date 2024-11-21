@@ -72,111 +72,74 @@ exports.createTask = async (req, res) => {
     }
 }
 
-exports.getTask = async (req,res) =>{
-    
+
+exports.getTask = async (req, res) => {
     try {
-        const task = await Task.find({});
+        const page = parseInt(req.query.page) || 1; // Default to page 1
+        const limit = parseInt(req.query.limit) || 5; // Default to 5 tasks per page
+        const status = req.query.status || 'pending';
+        const priority = req.query.priority || 'low';
 
-        if(task.length >=1){
-            console.log(`task lengh ${task}`);
+        const taskcachedKey = `tasks:page=${page}&limit=${limit}&status=${status}&priority=${priority}`;
 
-             // Get pagination parameters from query, with default values
-            const page = parseInt(req.query.page) || 1; // Default to page 1
-            const limit = parseInt(req.query.limit) || 5; // Default to 5 tasks per page if not entered
-
-            const status = parseInt(req.query.status) || 'pending'; // Default to page 1
-            const priority = parseInt(req.query.limit) || 'low'; // Default to 5 tasks per page if not entered
-
-            //define cached key here
-            const taskcachedKey = `tasks:page=${page}&limit=${limit}`;
-
-            //fetch task from cache rather than from database 
-
-            const cachedTask = await redisClient.get(taskcachedKey);
-
-            //check if data present in the cache
-            if(cachedTask){
-                return res.status(200).json({
-                    Task:cachedTask.map(task => ({                    
-                        title: task.title,
-                        description: task.description,
-                        dueDate: task.dueDate,
-                        status: task.status,
-                        priority: task.priority,
-                        createdBy: task.createdBy,
-                        assignedTo: task.assignedTo,
-                        tags: task.tags,
-                        createdAt: task.createdAt,
-                        updatedAt: task.updatedAt
-                    })),
-                    pagination: {
-                        currentPage: page,
-                        totalPages,
-                        totalTasks,
-                        pageSize: tasks.length,
-                    }
-                });
-
-            }
-
-
-
-
-            // Calculate the starting index for the query
-            const skip = (page - 1) * limit;
-
-            // Retrieve tasks from the database with pagination
-            const tasks = await Task.find((status && { status }),(priority && { priority }))
-                .skip(skip) // Skip documents for pagination
-                .limit(limit) // Limit the number of documents returned
-                .sort({ createdAt: -1 }); // Sort by creation date, newest first
-
-            // Get the total count of documents to calculate the total pages
-            const totalTasks = await Task.countDocuments();
-            const totalPages = Math.ceil(totalTasks / limit);
-
-            const response = {
-                Task:tasks.map(task => ({                    
-                    title: task.title,
-                    description: task.description,
-                    dueDate: task.dueDate,
-                    status: task.status,
-                    priority: task.priority,
-                    createdBy: task.createdBy,
-                    assignedTo: task.assignedTo,
-                    tags: task.tags,
-                    createdAt: task.createdAt,
-                    updatedAt: task.updatedAt
-                })),
-                pagination: {
-                    currentPage: page,
-                    totalPages,
-                    totalTasks,
-                    pageSize: tasks.length,
-                }
-            }
-
-            //here I  Store the response in Redis with an expiration time (e.g., 1 hour = 3600s)
-            //so that next time it can be use from cache memory
-
-            await redisClient.setEx(taskcachedKey,3600,JSON.stringify(response));
-
-            return res.status(200).json(response);
-            
-        }else{
-            return res.status(404).json({
-            message:'Task list is empty',            
-            })
+        // Check cache
+        const cachedTask = await redisClient.get(taskcachedKey);
+        if (cachedTask) {
+            const parsedTask = JSON.parse(cachedTask);
+            return res.status(200).json(parsedTask);
         }
 
+        // Build query
+        const query = {};
+        if (req.query.status) query.status = req.query.status;
+        if (req.query.priority) query.priority = req.query.priority;
+
+        const skip = (page - 1) * limit;
+
+        const tasks = await Task.find(query)
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+
+        const totalTasks = await Task.countDocuments(query);
+        const totalPages = Math.ceil(totalTasks / limit);
+
+        const response = {
+            Task: tasks.map(task => ({
+                id: task._id,
+                title: task.title,
+                description: task.description,
+                dueDate: task.dueDate,
+                status: task.status,
+                priority: task.priority,
+                createdBy: task.createdBy,
+                assignedTo: task.assignedTo,
+                tags: task.tags,
+                createdAt: task.createdAt,
+                updatedAt: task.updatedAt
+            })),
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalTasks,
+                pageSize: tasks.length
+            }
+        };
+
+        // Cache the response
+        await redisClient.setEx(taskcachedKey, 3600, JSON.stringify(response));
+
+        return res.status(200).json(response);
     } catch (error) {
         console.error(error);
         return res.status(500).json({
-            message:'server Failed to fetch task',
-            error:error.message,
-        })     
+            message: 'Failed to fetch tasks',
+            error: error.message
+        });
     }
 }
+
+
 
 exports.getTaskById = async (req,res) =>{
     const id = req.params.id;
@@ -209,7 +172,7 @@ exports.getTaskById = async (req,res) =>{
             })
         }else{
             return res.status(404).json({
-            message:'Task list is empty',            
+            message:'Task does not exist empty',            
             })
         }
 
@@ -327,7 +290,7 @@ exports.shareTask = async (req, res) => {
         return res.status(404).json({ message: 'Task not found' });
         }
   
-        // Check if the current user is the task creator
+        // Check if the current user is not the task creator
 
         if (task.createdBy.toString() !== req.user.id) {
             return res.status(403).json({ message: 'You can only share tasks that you have created.' });

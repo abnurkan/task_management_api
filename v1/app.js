@@ -4,7 +4,7 @@ const morgan = require('morgan')
 const app = express();
 const authRoutes =require('./routes/authRoutes');
 const taskRoutes =require('./routes/taskRoutes');
-
+const cors = require('cors');
 // Swagger options
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
@@ -22,7 +22,7 @@ const options = {
         },
         servers: [
             {
-                url: `http://localhost: ${PORT}`,
+                url: `http://localhost:${PORT}/api/v1`,
             },
         ],
     },
@@ -30,8 +30,6 @@ const options = {
 };
 
 const swaggerSpec = swaggerJsdoc(options);
-
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 //add morgan 
@@ -42,11 +40,13 @@ app.use(express.json());
 // Middleware to parse JSON
 app.use(express.json());
 
-// Swagger route
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.use(cors());
 
 app.use('/api/v1',authRoutes);
 app.use('/api/v1',taskRoutes);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 
