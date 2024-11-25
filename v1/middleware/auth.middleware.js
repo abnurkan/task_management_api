@@ -6,7 +6,8 @@ const authMiddleware = (req, res, next) => {
     try {
         // Extract token from header and remove "Bearer " prefix
         const token = req.header('Authorization')?.replace('Bearer ', '');
-
+        // const token = req.header('Authorization');
+        
         // Check if the token is present
         if (!token) {
             return res.status(401).json({ message: 'Authorization token missing!' });

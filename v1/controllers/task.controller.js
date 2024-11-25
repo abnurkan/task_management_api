@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const redisClient = require('../config/redis');
 const sendEmail = require('../utils/sendEmail'); // Import the sendEmail function
 
-
+let currentUser;
 exports.createTask = async (req, res) => {
     
     const { title, description, dueDate, priority, assignedTo, tags } = req.body;
@@ -27,7 +27,7 @@ exports.createTask = async (req, res) => {
         }
 
         // Get current user from authMiddleware
-        const currentUser = req.user._id;
+        currentUser = req.user._id;
         console.log(`current User ${currentUser}`);
 
         // Create a new task
@@ -93,10 +93,11 @@ exports.getTask = async (req, res) => {
         const query = {};
         if (req.query.status) query.status = req.query.status;
         if (req.query.priority) query.priority = req.query.priority;
+        query.createdBy = currentUser;
 
         const skip = (page - 1) * limit;
 
-        const tasks = await Task.find(query)
+        const tasks = await Task.find(query) //update this query to fetch task specific to current user 
             .skip(skip)
             .limit(limit)
             .sort({ createdAt: -1 });
@@ -151,7 +152,11 @@ exports.getTaskById = async (req,res) =>{
         });
     }
     try {
-        const task = await Task.findById(id);
+        // const task = await Task.findById(id);
+        const  task = await Task.findOne({
+            _id: `${id}`,
+            createdBy: `${currentUser}`
+          });
 
         if(task){
             console.log(task);
@@ -203,8 +208,13 @@ exports.updateTask = async (req,res) =>{
             return res.status(400).json({ message: `Status must be one of ${allowedStatuses.join(', ')}.` });
         }
 
-        const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
-
+        // const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const task = await Task.findOneAndUpdate(
+            { _id: req.params.id, createdBy: currentUser }, // Match task by ID and owner
+            req.body, // Update data
+            { new: true } // Return the updated document
+          );
+          
         if(task){
             
             console.log(task);
@@ -225,7 +235,7 @@ exports.updateTask = async (req,res) =>{
             })
         }else{
             return res.status(404).json({
-            message:'Task not found',            
+            message:'Task not found or not authorized to update',            
             })
         }
 
@@ -250,7 +260,9 @@ exports.deleteTask = async (req,res) =>{
     }
     try {
 
-        const task = await Task.findByIdAndDelete(req.params.id);
+        // const task = await Task.findByIdAndDelete(req.params.id);
+        const task = await Task.findOneAndDelete({ _id: req.params.id, createdBy: currentUser });
+
 
         if(task){
             console.log(task);
@@ -259,7 +271,7 @@ exports.deleteTask = async (req,res) =>{
             })
         }else{
             return res.status(404).json({
-                message:'Task not found',            
+                message:'Task not found or not authorized to delete',            
             })
         }
 
@@ -285,9 +297,15 @@ exports.shareTask = async (req, res) => {
   
     try {
         // Find the task to be shared
-        const task = await Task.findById(taskId);
+        // const task = await Task.findById(taskId);
+
+        // const task = await Task.findById(id);
+        const  task = await Task.findOne({
+            _id: `${taskId}`,
+            createdBy: `${currentUser}`
+          });
         if (!task) {
-        return res.status(404).json({ message: 'Task not found' });
+        return res.status(404).json({ message: 'Task not found or not authorise to share' });
         }
   
         // Check if the current user is not the task creator

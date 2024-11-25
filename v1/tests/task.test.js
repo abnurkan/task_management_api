@@ -177,7 +177,7 @@ describe('PUT /tasks/:id- Get Task Given a task ID', () => {
             .send(UpdatedTask);
 
         // Check the response structure
-        expect(response.body.message).toBe('Task not found');   
+        expect(response.body.message).toBe('Task not found or not authorized to update');   
     });
 });
 
